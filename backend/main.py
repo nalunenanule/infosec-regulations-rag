@@ -2,14 +2,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from api.endpoints import router as api_router
-from services.vectorstore import QdrantClient
-from config import QDRANT_URL
+from qdrant_client import QdrantClient
+from providers.s3_provider import S3Provider
+from config import QDRANT_URL, S3_URL, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET_NAME
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     client = QdrantClient(url=QDRANT_URL)
     app.state.client = client
     print("Qdrant client initialized.")
+
+    s3_provider = S3Provider(
+        endpoint_url=S3_URL,
+        access_key=S3_ACCESS_KEY,
+        secret_key=S3_SECRET_KEY,
+        bucket_name=S3_BUCKET_NAME
+    )
+    app.state.s3_provider = s3_provider
+    print("S3 provider initialized.")
+
     yield
     print("Application shutdown.")
 
