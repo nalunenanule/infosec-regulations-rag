@@ -1,0 +1,34 @@
+<div class="chat-container">
+
+  <header class="chat-header">
+    <span>RAG Chat</span>
+    <button
+      class="index-btn"
+      (click)="indexDocuments()"
+      [disabled]="indexing"
+    >
+      {{ indexing ? 'Индексирование…' : 'Индексировать' }}
+    </button>
+  </header>
+
+  <div class="chat-body">
+    <div
+      class="message"
+      *ngFor="let m of messages()"
+      [class.user]="m.role === 'user'"
+      [class.assistant]="m.role === 'assistant'"
+    >
+      {{ m.text }}
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input
+      [(ngModel)]="query"
+      (keyup.enter)="sendQuery()"
+      placeholder="Введите вопрос…"
+    />
+    <button (click)="sendQuery()">➤</button>
+  </div>
+
+</div>

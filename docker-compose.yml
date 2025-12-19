@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fastapi-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      COLLECTION_NAME: ${COLLECTION_NAME}
+      GIGACHAT_TOKEN: ${GIGACHAT_TOKEN}
+      EMBEDDINGS_MODEL_NAME: ${EMBEDDINGS_MODEL_NAME}
+      QDRANT_URL: ${QDRANT_URL}
+    volumes:
+      - ./src/data/pdf:/app/data/pdf
+      - ./src/huggingface_models:/huggingface_models
+    networks:
+      - rag-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: angular-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    networks:
+      - rag-net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - F:\qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+      QDRANT__TELEMETRY_DISABLED: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rag-net
+
+networks:
+  rag-net:
+    driver: bridge
+
+volumes:
+  qdrant_data:
+    driver: local
