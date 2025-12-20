@@ -13,6 +13,7 @@ services:
       COLLECTION_NAME: ${COLLECTION_NAME}
       GIGACHAT_TOKEN: ${GIGACHAT_TOKEN}
       DENSE_MODEL_PATH: ${DENSE_MODEL_PATH}
+      DENSE_MODEL_NAME: ${DENSE_MODEL_NAME}
       SPARSE_MODEL_PATH: ${SPARSE_MODEL_PATH}
       SPARSE_MODEL_NAME: ${SPARSE_MODEL_NAME}
       QDRANT_URL: ${QDRANT_URL}
@@ -78,7 +79,3 @@ services:
 networks:
   rag-net:
     driver: bridge
-
-volumes:
-  qdrant_data:
-    driver: local
