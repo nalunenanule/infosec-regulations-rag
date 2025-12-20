@@ -110,3 +110,4 @@ Thumbs.db
 .env
 src/huggingface_models
 src/minio_data
+src/qdrant_data

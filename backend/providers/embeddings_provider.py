@@ -19,4 +19,4 @@ class EmbeddingProvider:
         )
 
     def get_sparse_embeddings(self):
-        return SparseTextEmbedding(model_name=self.sparse_model_name)
+        return SparseTextEmbedding(model_name=self.sparse_model_name, cache_dir="./huggingface_models/")
