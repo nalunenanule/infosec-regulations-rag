@@ -108,6 +108,9 @@ dmypy.json
 .DS_Store
 Thumbs.db
 .env
-src/huggingface_models
-src/minio_data
-src/qdrant_data
+src/huggingface_models/*
+!src/huggingface_models/.gitkeep
+src/minio_data/*
+!src/minio_data/.gitkeep
+src/qdrant_data/*
+!src/qdrant_data/.gitkeep

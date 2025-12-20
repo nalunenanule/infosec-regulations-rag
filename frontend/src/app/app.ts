@@ -1,7 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,15 +14,12 @@ interface Message {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    HttpClientModule
+    FormsModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  API_URL = 'http://localhost:8000';
-
   query = '';
   indexing = false;
 
@@ -41,7 +39,7 @@ export class App {
     ]);
 
     this.http.post<{ answer: string }>(
-      `${this.API_URL}/query`,
+      `${environment.apiUrl}/query`,
       { query: question }
     ).subscribe(res => {
       this.messages.update(m => [
@@ -55,7 +53,7 @@ export class App {
     this.indexing = true;
 
     this.http.post<{ indexed_count: number }>(
-      `${this.API_URL}/index-documents`,
+      `${environment.apiUrl}/index-documents`,
       {}
     ).subscribe(res => {
       this.messages.update(m => [
