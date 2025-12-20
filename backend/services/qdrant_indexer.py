@@ -3,7 +3,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, SparseVectorParams, PointStruct
 from langchain_core.documents import Document
 from config import COLLECTION_NAME
-from providers.embeddings_provider import EmbeddingProvider
+from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 
 class QdrantIndexer:
@@ -14,7 +14,7 @@ class QdrantIndexer:
     
     def __init__(self, client: QdrantClient):
         self.client = client
-        self.embedding_provider = EmbeddingProvider()
+        self.embedding_provider = EmbeddingsProvider()
 
     def build_collection(self, docs: list[Document]):
         if self.client.collection_exists(COLLECTION_NAME):

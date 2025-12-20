@@ -108,9 +108,20 @@ dmypy.json
 .DS_Store
 Thumbs.db
 .env
+# HuggingFace модели
 src/huggingface_models/*
+!src/huggingface_models/sparse/
+!src/huggingface_models/dense/
+src/huggingface_models/sparse/*
+!src/huggingface_models/sparse/.gitkeep
+src/huggingface_models/dense/*
+!src/huggingface_models/dense/.gitkeep
 !src/huggingface_models/.gitkeep
+
+# MinIO данные
 src/minio_data/*
 !src/minio_data/.gitkeep
+
+# Qdrant данные
 src/qdrant_data/*
 !src/qdrant_data/.gitkeep

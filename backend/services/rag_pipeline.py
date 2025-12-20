@@ -2,13 +2,13 @@ from langchain_core.documents import Document
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
 from services.qdrant_indexer import QdrantClient
-from providers.embeddings_provider import EmbeddingProvider
+from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 from config import GIGACHAT_TOKEN, COLLECTION_NAME
 from qdrant_client import models
 
 def hybrid_search(client: QdrantClient, query: str, k: int = 5):
-    embedding_provider = EmbeddingProvider()
+    embedding_provider = EmbeddingsProvider()
     dense_query = embedding_provider.get_dense_embeddings().embed_query(f"query: {query}")
     sparse_raw = embedding_provider.get_sparse_embeddings().embed(RuTextUtilities().preprocess(query)).__next__()
     sparse_query = models.SparseVector(indices=sparse_raw.indices.tolist(), values=sparse_raw.values.tolist())
