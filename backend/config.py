@@ -6,7 +6,7 @@ env_path = Path(".env")
 if env_path.exists():
     load_dotenv(env_path)
 
-COLLECTION_NAME=os.getenv("COLLECTION_NAME")
+QDRANT_COLLECTION_NAME=os.getenv("QDRANT_COLLECTION_NAME")
 QDRANT_URL=os.getenv("QDRANT_URL")
 GIGACHAT_TOKEN=os.getenv("GIGACHAT_TOKEN")
 DENSE_MODEL_PATH=os.getenv("DENSE_MODEL_PATH")

@@ -2,7 +2,7 @@ from tqdm import tqdm
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, SparseVectorParams, PointStruct
 from langchain_core.documents import Document
-from config import COLLECTION_NAME
+from config import QDRANT_COLLECTION_NAME
 from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 
@@ -17,11 +17,11 @@ class QdrantIndexer:
         self.embedding_provider = EmbeddingsProvider()
 
     def build_collection(self, docs: list[Document]):
-        if self.client.collection_exists(COLLECTION_NAME):
-            self.client.delete_collection(COLLECTION_NAME)
+        if self.client.collection_exists(QDRANT_COLLECTION_NAME):
+            self.client.delete_collection(QDRANT_COLLECTION_NAME)
 
         self.client.create_collection(
-            collection_name=COLLECTION_NAME,
+            collection_name=QDRANT_COLLECTION_NAME,
             vectors_config={"dense": VectorParams(size=384, distance=Distance.COSINE)},
             sparse_vectors_config={"sparse": SparseVectorParams()}
         )
@@ -48,6 +48,6 @@ class QdrantIndexer:
         batch_size = 100
         for i in tqdm(range(0, len(points), batch_size), desc="Uploading to Qdrant", unit="batch"):
             self.client.upsert(
-                collection_name=COLLECTION_NAME,
+                collection_name=QDRANT_COLLECTION_NAME,
                 points=points[i:i+batch_size]
             )

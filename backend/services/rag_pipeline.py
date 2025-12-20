@@ -4,7 +4,7 @@ from gigachat.models import Chat, Messages, MessagesRole
 from services.qdrant_indexer import QdrantClient
 from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
-from config import GIGACHAT_TOKEN, COLLECTION_NAME
+from config import GIGACHAT_TOKEN, QDRANT_COLLECTION_NAME
 from qdrant_client import models
 
 def hybrid_search(client: QdrantClient, query: str, k: int = 5):
@@ -14,7 +14,7 @@ def hybrid_search(client: QdrantClient, query: str, k: int = 5):
     sparse_query = models.SparseVector(indices=sparse_raw.indices.tolist(), values=sparse_raw.values.tolist())
 
     result = client.query_points(
-        collection_name=COLLECTION_NAME,
+        collection_name=QDRANT_COLLECTION_NAME,
         prefetch=[
             models.Prefetch(query=sparse_query, using="sparse", limit=20),
             models.Prefetch(query=dense_query, using="dense", limit=20),

@@ -1,7 +1,6 @@
 <div class="chat-container">
 
   <header class="chat-header">
-    <span>RAG Chat</span>
     <button
       class="index-btn"
       (click)="indexDocuments()"
@@ -12,14 +11,15 @@
   </header>
 
   <div class="chat-body">
+    @for (m of messages(); track m) {
     <div
       class="message"
-      *ngFor="let m of messages()"
       [class.user]="m.role === 'user'"
       [class.assistant]="m.role === 'assistant'"
     >
       {{ m.text }}
     </div>
+  }
   </div>
 
   <div class="chat-input">

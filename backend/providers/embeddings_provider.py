@@ -10,8 +10,10 @@ class EmbeddingsProvider:
     Если модель не найдена по пути dense_model_path, скачивает ее автоматически.
     """
 
-    DEFAULT_DENSE_MODEL = "intfloat/multilingual-e5-small"
-    DEFAULT_SPARSE_MODEL = "Qdrant/bm25"
+    DEFAULT_DENSE_MODEL_NAME = "intfloat/multilingual-e5-small"
+    DEFAULT_DENSE_MODEL_PATH = "./huggingface_models/dense"
+    DEFAULT_SPARSE_MODEL_NAME = "Qdrant/bm25"
+    DEFAULT_SPARSE_MODEL_PATH = "./huggingface_models/sparse"
 
     def __init__(
         self,
@@ -20,10 +22,10 @@ class EmbeddingsProvider:
         sparse_model_path: str = None,
         sparse_model_name: str = None,
     ):
-        self.dense_model_path = dense_model_path or DENSE_MODEL_PATH or "./huggingface_models/dense"
-        self.dense_model_name = dense_model_name or DENSE_MODEL_NAME or self.DEFAULT_DENSE_MODEL
-        self.sparse_model_path = sparse_model_path or SPARSE_MODEL_PATH or "./huggingface_models/sparse"
-        self.sparse_model_name = sparse_model_name or SPARSE_MODEL_NAME or self.DEFAULT_SPARSE_MODEL
+        self.dense_model_path = dense_model_path or DENSE_MODEL_PATH or self.DEFAULT_DENSE_MODEL_PATH
+        self.dense_model_name = dense_model_name or DENSE_MODEL_NAME or self.DEFAULT_DENSE_MODEL_NAME
+        self.sparse_model_path = sparse_model_path or SPARSE_MODEL_PATH or self.DEFAULT_SPARSE_MODEL_PATH
+        self.sparse_model_name = sparse_model_name or SPARSE_MODEL_NAME or self.DEFAULT_SPARSE_MODEL_NAME
 
         # Проверяем и скачиваем dense модель
         if not Path(self.dense_model_path).exists():

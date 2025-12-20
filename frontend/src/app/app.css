@@ -2,20 +2,20 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 900px;
   margin: 0 auto;
   font-family: system-ui, Arial, sans-serif;
 }
 
 .chat-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 12px;
   background: #202123;
   color: white;
 }
 
 .index-btn {
+  border-radius: 15px;
   background: #444;
   color: white;
   border: none;
@@ -52,7 +52,6 @@
 
 .chat-input {
   display: flex;
-  padding: 12px;
   background: white;
   border-top: 1px solid #ddd;
 }
