@@ -1,18 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from models.schemas import QueryRequest, QueryResponse, IndexResponse
-from utils.pdf_utilities import PDFUtilities
-from services.qdrant_indexer import QdrantIndexer
+from services.legaldoc_indexer import LegalDocIndexer
 from services.rag_pipeline import run_qa
 from qdrant_client import QdrantClient
 from providers.s3_provider import S3Provider
 
 router = APIRouter()
 
-def get_client(request: Request) -> QdrantClient:
-    client = getattr(request.app.state, "client", None)
-    if client is None:
+def get_qdrant_client(request: Request) -> QdrantClient:
+    qdrant_client = getattr(request.app.state, "qdrant_client", None)
+    if qdrant_client is None:
         raise HTTPException(status_code=500, detail="Qdrant client not initialized")
-    return client
+    return qdrant_client
 
 def get_s3_provider(request: Request) -> S3Provider:
     provider = getattr(request.app.state, "s3_provider", None)
@@ -21,17 +20,16 @@ def get_s3_provider(request: Request) -> S3Provider:
     return provider
 
 @router.post("/index-documents", response_model=IndexResponse)
-async def index_documents_from_s3_endpoint(
-    s3: S3Provider = Depends(get_s3_provider),
-    client: QdrantClient = Depends(get_client)
+async def index_documents_endpoint(
+    s3_provider: S3Provider = Depends(get_s3_provider),
+    qdrant_client: QdrantClient = Depends(get_qdrant_client)
 ):
-    files_urls = s3.get_files_urls() 
-    docs, doc_length = PDFUtilities.load_and_split_pdfs(files_urls)
-    indexer = QdrantIndexer(client)
-    indexer.build_collection(docs)
-    return {"indexed_count": doc_length}
+    s3_client = s3_provider.get_s3_client()
+    indexer = LegalDocIndexer(qdrant_client, s3_client)
+    indexed_count = indexer.index()
+    return {"indexed_count": indexed_count}
 
 @router.post("/query", response_model=QueryResponse)
-async def query_endpoint(request: QueryRequest, client: QdrantClient = Depends(get_client)):
+async def query_endpoint(request: QueryRequest, client: QdrantClient = Depends(get_qdrant_client)):
     answer = run_qa(request.query, client)
     return {"answer": answer}

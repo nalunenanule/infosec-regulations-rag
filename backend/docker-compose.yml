@@ -1,21 +1,13 @@
-version: "3.9"
-
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: fastapi-backend
+    container_name: fastapi-backend-standalone
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      QDRANT_COLLECTION_NAME: ${QDRANT_COLLECTION_NAME}
-      GIGACHAT_TOKEN: ${GIGACHAT_TOKEN}
-      DENSE_MODEL_PATH: ${DENSE_MODEL_PATH}
-      SPARSE_MODEL_PATH: ${SPARSE_MODEL_PATH}
-      SPARSE_MODEL_NAME: ${SPARSE_MODEL_NAME}
-      QDRANT_URL: ${QDRANT_URL}
+    env_file: ".docker.env"
     volumes:
       - ../src/huggingface_models:/huggingface_models
     networks:
@@ -23,17 +15,14 @@ services:
 
   qdrant:
     image: qdrant/qdrant:latest
-    container_name: qdrant
+    container_name: qdrant-backend
     restart: unless-stopped
     ports:
       - "6333:6333"
       - "6334:6334"
     volumes:
       - ../src/qdrant_data:/qdrant/storage
-    environment:
-      QDRANT__SERVICE__HTTP_PORT: 6333
-      QDRANT__SERVICE__GRPC_PORT: 6334
-      QDRANT__TELEMETRY_DISABLED: "true"
+    env_file: ".docker.env"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:6333/healthz"]
       interval: 10s
@@ -44,14 +33,12 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: minio-backend
     restart: unless-stopped
     ports:
       - "9000:9000"
       - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    env_file: ".docker.env"
     command: server /data --console-address ":9001"
     volumes:
       - ../src/minio_data:/data

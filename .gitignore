@@ -27,6 +27,7 @@ var/
 .installed.cfg
 *.egg
 *.whl
+Scripts/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -125,3 +126,7 @@ src/minio_data/*
 # Qdrant данные
 src/qdrant_data/*
 !src/qdrant_data/.gitkeep
+backend/.env.docker
+backend/.env.local
+backend/.docker.env
+backend/.local.env

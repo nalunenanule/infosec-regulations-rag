@@ -1,7 +1,7 @@
 from langchain_core.documents import Document
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
-from services.qdrant_indexer import QdrantClient
+from qdrant_client import QdrantClient
 from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 from config import GIGACHAT_TOKEN, QDRANT_COLLECTION_NAME
