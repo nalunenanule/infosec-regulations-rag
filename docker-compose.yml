@@ -8,6 +8,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      USE_GIGACHAT_EMBEDDINGS: "1"
       QDRANT_COLLECTION_NAME: ${QDRANT_COLLECTION_NAME}
       QDRANT_URL: ${QDRANT_URL}
       GIGACHAT_TOKEN: ${GIGACHAT_TOKEN}

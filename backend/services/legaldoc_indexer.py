@@ -24,7 +24,7 @@ class LegalDocIndexer:
         """
         all_docs = []
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2500,
+            chunk_size=1200,
             chunk_overlap=300,
             separators=[
                 "\n\n\n",
@@ -73,7 +73,7 @@ class LegalDocIndexer:
 
         self.qdrant_client.create_collection(
             collection_name=QDRANT_COLLECTION_NAME,
-            vectors_config={"dense": VectorParams(size=384, distance=Distance.COSINE)},
+            vectors_config={"dense": VectorParams(size=1024, distance=Distance.COSINE)},
             sparse_vectors_config={"sparse": SparseVectorParams()}
         )
 

@@ -7,6 +7,7 @@ if os.getenv("RUNNING_IN_DOCKER") != "1":
     if env_path.exists():
         load_dotenv(env_path)
 
+USE_GIGACHAT_EMBEDDINGS = os.getenv("USE_GIGACHAT_EMBEDDINGS")
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
 QDRANT_URL = os.getenv("QDRANT_URL")
 GIGACHAT_TOKEN = os.getenv("GIGACHAT_TOKEN")
