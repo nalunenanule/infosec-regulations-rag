@@ -3,7 +3,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, SparseVectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct
 from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 from config import QDRANT_COLLECTION_NAME, S3_BUCKET_NAME
@@ -73,22 +73,19 @@ class LegalDocIndexer:
 
         self.qdrant_client.create_collection(
             collection_name=QDRANT_COLLECTION_NAME,
-            vectors_config={"dense": VectorParams(size=1024, distance=Distance.COSINE)},
-            sparse_vectors_config={"sparse": SparseVectorParams()}
+            vectors_config={"dense": VectorParams(size=1024, distance=Distance.COSINE)}
         )
 
         dense_embeddings = self.embedding_provider.get_dense_embeddings()
-        sparse_model = self.embedding_provider.get_sparse_embeddings()
 
         points = []
         for i, doc in enumerate(docs):
             dense_vector = dense_embeddings.embed_documents([f"passage: {doc.page_content}"])[0]
-            sparse_vector = list(sparse_model.embed([RuTextUtilities().preprocess(doc.page_content)]))[0]
 
             points.append(
                 PointStruct(
                     id=i,
-                    vector={"dense": dense_vector, "sparse": sparse_vector.as_object()},
+                    vector={"dense": dense_vector},
                     payload={"page_content": doc.page_content, "metadata": doc.metadata}
                 )
             )

@@ -5,21 +5,15 @@ from qdrant_client import QdrantClient
 from providers.embeddings_provider import EmbeddingsProvider
 from utils.ru_text_utilities import RuTextUtilities
 from config import GIGACHAT_TOKEN, QDRANT_COLLECTION_NAME
-from qdrant_client import models
 
 def hybrid_search(client: QdrantClient, query: str, k: int = 5):
     embedding_provider = EmbeddingsProvider()
-    dense_query = embedding_provider.get_dense_embeddings().embed_query(f"query: {query}")
-    sparse_raw = embedding_provider.get_sparse_embeddings().embed(RuTextUtilities().preprocess(query)).__next__()
-    sparse_query = models.SparseVector(indices=sparse_raw.indices.tolist(), values=sparse_raw.values.tolist())
+    dense_query = embedding_provider.get_dense_embeddings().embed_query(f"query: {RuTextUtilities().preprocess(query)}")
 
-    result = client.query_points(
-        collection_name=QDRANT_COLLECTION_NAME,
-        prefetch=[
-            models.Prefetch(query=sparse_query, using="sparse", limit=20),
-            models.Prefetch(query=dense_query, using="dense", limit=20),
-        ],
-        query=models.FusionQuery(fusion=models.Fusion.RRF),
+    result = client.query_points(collection_name=QDRANT_COLLECTION_NAME,
+        query=dense_query,
+        using="dense",
+        limit=5
     )
 
     return result.points
