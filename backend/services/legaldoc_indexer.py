@@ -47,7 +47,7 @@ class LegalDocIndexer:
             split_docs = splitter.split_documents(docs)
             all_docs.extend(split_docs)
 
-        return all_docs
+        return len(file_urls), all_docs
     
     def list_files(self, prefix: str = "") -> List[str]:
         paginator = self.s3_client.get_paginator("list_objects_v2")
@@ -102,6 +102,6 @@ class LegalDocIndexer:
         Основная функция: загружает PDF, разбивает на чанки и индексирует в Qdrant.
         Возвращает количество чанков.
         """
-        docs = self.load_and_split_pdfs()
+        docs_lenth, docs = self.load_and_split_pdfs()
         self.build_collection(docs)
-        return len(docs)
+        return docs_lenth
