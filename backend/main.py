@@ -8,7 +8,7 @@ from config import QDRANT_URL, S3_URL, S3_ACCESS_KEY, S3_SECRET_KEY
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    qdrant_client = QdrantClient(url=QDRANT_URL, check_compatibility=False)
+    qdrant_client = QdrantClient(url=QDRANT_URL, check_compatibility=False, timeout=60)
     app.state.qdrant_client = qdrant_client
     print("Qdrant client initialized.")
 

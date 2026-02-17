@@ -1,11 +1,12 @@
 from typing import List
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+import tempfile
+import os
+import re
+from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from langchain_core.documents import Document
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from providers.embeddings_provider import EmbeddingsProvider
-from utils.ru_text_utilities import RuTextUtilities
 from config import QDRANT_COLLECTION_NAME, S3_BUCKET_NAME
 
 class LegalDocIndexer:
@@ -19,50 +20,63 @@ class LegalDocIndexer:
         self.embedding_provider = EmbeddingsProvider()
 
     def load_and_split_pdfs(self) -> List[Document]:
-        """
-        Загружает PDF-документы и делит их на чанки.
-        """
         all_docs = []
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1200,
-            chunk_overlap=300,
-            separators=[
-                "\n\n\n",
-                "Глава ",
-                "\nСтатья ",
-                "\n\n",
-                "\n\d+\.\s",
-                "\n\d+\)\s",
-                "\n\d+\.\d+\)\s",
-                "\n",
-                " "
-            ],
-            keep_separator=True
+        headers_to_split_on = [
+            ("#", "chapter"),
+            ("##", "article"),
+        ]
+        
+        md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+        recursive_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1200, 
+            chunk_overlap=200,
+            separators=["\n\n", "\n", " ", ""]
         )
 
-        file_urls = self.list_files()
-        for url in file_urls:
-            loader = PyPDFLoader(url)
-            docs = loader.load()
-            split_docs = splitter.split_documents(docs)
-            all_docs.extend(split_docs)
+        file_keys = self.list_s3_keys()
+        for key in file_keys:
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".md")
+            tmp_path = tmp.name
+            tmp.close()
 
-        return len(file_urls), all_docs
+            try:
+                self.s3_client.download_file(S3_BUCKET_NAME, key, tmp_path)
+                with open(tmp_path, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+
+                file_content = re.sub(r'^(#+)([^ \t#\n])', r'\1 \2', file_content, flags=re.MULTILINE)
+                sections = md_splitter.split_text(file_content)
+
+                for section in sections:
+                    final_chunks = recursive_splitter.split_documents([section])
+                    
+                    for chunk in final_chunks:
+                        chunk.metadata["source"] = key
+                        if "article" in chunk.metadata:
+                            chunk.metadata["article_number"] = self._extract_number(chunk.metadata["article"])
+                        if "chapter" in chunk.metadata:
+                            chunk.metadata["chapter_number"] = self._extract_number(chunk.metadata["chapter"])
+                        
+                        all_docs.append(chunk)
+                        
+            finally:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+
+        return len(file_keys), all_docs
     
-    def list_files(self, prefix: str = "") -> List[str]:
+    def _extract_number(self, text: str) -> str:
+        match = re.search(r"(\d+)", text)
+        return match.group(1) if match else text
+    
+    def list_s3_keys(self, prefix: str = "") -> List[str]:
         paginator = self.s3_client.get_paginator("list_objects_v2")
-        file_list = []
+        keys = []
         for page in paginator.paginate(Bucket=S3_BUCKET_NAME, Prefix=prefix):
             for obj in page.get("Contents", []):
-                file_list.append(self.get_file_url(obj["Key"]))
-        return file_list
-    
-    def get_file_url(self, key: str, expires_in: int = 3600) -> str:
-        return self.s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": S3_BUCKET_NAME, "Key": key},
-            ExpiresIn=expires_in
-        )
+                if obj["Key"].endswith(".md"):
+                    keys.append(obj["Key"])
+        return keys
 
     def build_collection(self, docs: List[Document]):
         """
@@ -80,7 +94,11 @@ class LegalDocIndexer:
 
         points = []
         for i, doc in enumerate(docs):
-            dense_vector = dense_embeddings.embed_documents([f"passage: {doc.page_content}"])[0]
+            chapter_name = doc.metadata.get("chapter", "")
+            article_name = doc.metadata.get("article", "")
+            full_context = f"passage: {chapter_name} {article_name} {doc.page_content}"
+
+            dense_vector = dense_embeddings.embed_documents([full_context])[0]
 
             points.append(
                 PointStruct(

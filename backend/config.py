@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 if os.getenv("RUNNING_IN_DOCKER") != "1":
-    env_path = Path(".local.env")
+    env_path = Path(".env")
     if env_path.exists():
         load_dotenv(env_path)
 

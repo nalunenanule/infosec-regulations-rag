@@ -1,4 +1,3 @@
-import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.embeddings.gigachat import GigaChatEmbeddings
 from config import DENSE_MODEL_NAME, GIGACHAT_TOKEN, USE_GIGACHAT_EMBEDDINGS
