@@ -19,7 +19,7 @@ class LegalDocIndexer:
         self.s3_client = s3_client
         self.embedding_provider = EmbeddingsProvider()
 
-    def load_and_split_pdfs(self) -> List[Document]:
+    def load_and_split(self) -> List[Document]:
         all_docs = []
         headers_to_split_on = [
             ("#", "chapter"),
@@ -117,9 +117,9 @@ class LegalDocIndexer:
 
     def index(self) -> int:
         """
-        Основная функция: загружает PDF, разбивает на чанки и индексирует в Qdrant.
+        Основная функция: загружает документы, разбивает на чанки и индексирует в Qdrant.
         Возвращает количество чанков.
         """
-        docs_lenth, docs = self.load_and_split_pdfs()
+        docs_lenth, docs = self.load_and_split()
         self.build_collection(docs)
         return docs_lenth
