@@ -1,11 +1,4 @@
 import os
-from dotenv import load_dotenv
-from pathlib import Path
-
-if os.getenv("RUNNING_IN_DOCKER") != "1":
-    env_path = Path(".env")
-    if env_path.exists():
-        load_dotenv(env_path)
 
 USE_GIGACHAT_EMBEDDINGS = os.getenv("USE_GIGACHAT_EMBEDDINGS")
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
