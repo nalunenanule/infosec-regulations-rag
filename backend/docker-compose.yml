@@ -8,8 +8,6 @@ services:
     ports:
       - "8000:8000"
     env_file: ".docker.env"
-    volumes:
-      - ../src/huggingface_models:/huggingface_models
     networks:
       - rag-net
 
